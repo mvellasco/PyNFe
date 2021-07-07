@@ -156,6 +156,26 @@ class ComunicacaoSefaz(Comunicacao):
         xml = self._construir_xml_soap('NFeConsultaProtocolo4', raiz)
         return self._post(url, xml)
 
+    def consulta_xml_completo(self, chave, cnpj, modelo='nfe'):
+        """Baixa o xml completo da nota fiscal buscando por chave/cnpj.
+
+        :param modelo: Modelo da nota
+        :param chave: Chave da nota
+        :param cnpj: Cnpj que emitiu a nota fiscal
+        :return:
+        """
+        # url do serviço
+        url = self._get_url(modelo=modelo, consulta='CHAVE')
+        # Monta XML do corpo da requisição
+        raiz = etree.Element('downloadNFe', versao=VERSAO_PADRAO, xmlns=NAMESPACE_NFE)
+        etree.SubElement(raiz, 'tpAmb').text = str(self._ambiente)
+        etree.SubElement(raiz, 'xServ').text = 'DOWNLOAD NFE'
+        etree.SubElement(raiz, 'chNFe').text = chave
+        etree.SubElement(raiz, 'CNPJ').text = cnpj
+        # Monta XML para envio da requisição
+        xml = self._construir_xml_soap('NfeDownloadNF', raiz)
+        return self._post(url, xml)
+
     def consulta_distribuicao(self, cnpj=None, cpf=None, chave=None, nsu=0):
         """ 
             O XML do pedido de distribuição suporta três tipos de consultas que são definidas de acordo com a tag
